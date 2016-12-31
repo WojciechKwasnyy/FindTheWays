@@ -16,12 +16,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="FindTheWay"
+        android:text=" FindTheWay"
         android:id="@+id/title_textview"
         android:textColor="#FFFFFF"
         android:textSize="70dp"
+        android:layout_marginTop="37dp"
         android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentStart="true" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -36,11 +37,13 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="59dp" />
 
-    <ImageView
-        android:layout_width="150dp"
-        android:layout_height="150dp"
+    <pl.droidsonroids.gif.GifImageView
+        android:layout_width="400dp"
+        android:layout_height="400dp"
+        android:src="@drawable/logoanimation3"
         android:id="@+id/animationView"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_below="@+id/title_textview"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="62dp" />
 
 </RelativeLayout>
