@@ -21,9 +21,7 @@ public class WelcomeActivity extends AppCompatActivity {
         Typeface tf =  Typeface.createFromAsset(getAssets(), "FTW.ttf");
         Typeface tf2 =  Typeface.createFromAsset(getAssets(), "Sweet Sensations Personal Use.ttf");
 
-        ImageView gif = (ImageView) findViewById(R.id.animationView);
-        Animation logogif = AnimationUtils.loadAnimation(this, R.anim.animationgif);
-        gif.startAnimation(logogif);
+
         TextView textViewLoading = (TextView) findViewById(R.id.loading_textview);
         textViewLoading.setTypeface(tf2);
         TextView textViewTitle = (TextView) findViewById(R.id.title_textview);
