@@ -1,5 +1,6 @@
 package com.workspaceapp.findtheway;
 
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -11,6 +12,8 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import static java.lang.Thread.sleep;
 
 public class WelcomeActivity extends AppCompatActivity {
 
@@ -26,6 +29,27 @@ public class WelcomeActivity extends AppCompatActivity {
         textViewLoading.setTypeface(tf2);
         TextView textViewTitle = (TextView) findViewById(R.id.title_textview);
         textViewTitle.setTypeface(tf2);
+
+
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        finish();
+                        startActivity(new Intent(WelcomeActivity.this,LoginActivity.class));
+                    }
+                });
+
+            }
+        }).start();
 
     }
 
