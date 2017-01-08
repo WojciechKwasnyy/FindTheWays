@@ -31,6 +31,8 @@
             android:paddingBottom="16dp"
             android:orientation="vertical">
 
+
+
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
@@ -69,25 +71,33 @@
                 style="?android:textAppearanceSmall"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@string/action_sign_in"
+                android:layout_marginTop="30dp"
+                android:text="Sign In"
                 android:textStyle="bold" />
+            <TextView
+                android:text="Create an account now!"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:textStyle="bold"
+                android:layout_marginTop="30dp"
+                android:id="@+id/registeraccount" />
 
             <TextView
-                android:text="LUB"
+                android:text="OR"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/textView2"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="30dp"
                 android:gravity="center_vertical|center_horizontal"
-                android:textStyle="normal|bold" />
+                android:textStyle="normal" />
 
             <com.facebook.login.widget.LoginButton
                 android:id="@+id/login_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="15dp"
                 android:layout_marginRight="5dp"
                 android:layout_marginLeft="5dp"
                 style="com_facebook_loginview_dt_styleefaul" />
@@ -98,7 +108,7 @@
                 android:layout_height="wrap_content"
 
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="30dp" />
+                android:layout_marginTop="15dp" />
 
         </LinearLayout>
     </ScrollView>

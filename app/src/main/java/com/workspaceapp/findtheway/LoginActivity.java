@@ -8,6 +8,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
@@ -28,6 +29,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -45,7 +47,9 @@ import com.facebook.LoggingBehavior;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -55,7 +59,9 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -91,6 +97,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private TextView mRegisterTextView;
 
     CallbackManager mCallbackManager;
     private FirebaseAuth mAuth;
@@ -100,6 +107,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
 
     String TAG = "FindTheWays";
+    int RC_SIGN_IN = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,6 +136,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        mRegisterTextView = (TextView) findViewById(R.id.registeraccount);
+        mRegisterTextView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(LoginActivity.this,RegistrationActivity.class));
+            }
+        });
 
 
 
@@ -182,9 +198,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
         SignInButton signInButton = (SignInButton) findViewById(R.id.sign_in_button);
-        signInButton.setSize(SignInButton.SIZE_STANDARD);
+        signInButton.setSize(SignInButton.SIZE_WIDE);
+        findViewById(R.id.sign_in_button).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                signIn();
+            }
+        });
         setButtonText(signInButton,"Sign in with Google");
 
+    }
+    private void signIn() {
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
     protected void setButtonText(SignInButton signInButton, String buttonText) {
@@ -194,7 +220,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // if the view is instance of TextView then change the text SignInButton
             if (v instanceof TextView) {
                 TextView tv = (TextView) v;
-                tv.setText(buttonText);
+                //tv.setText(buttonText);
+                tv.setPadding(0,0,20,0);
                 tv.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
                 return;
             }
@@ -217,9 +244,47 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
+        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
+        if (requestCode == RC_SIGN_IN) {
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            if (result.isSuccess()) {
+                // Google Sign In was successful, authenticate with Firebase
+                GoogleSignInAccount account = result.getSignInAccount();
+                firebaseAuthWithGoogle(account);
+            } else {
+                // Google Sign In failed, update UI appropriately
+                // ...
+            }
+        }
         // Pass the activity result back to the Facebook SDK
         mCallbackManager.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
+        Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
+
+        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
+
+                        // If sign in fails, display a message to the user. If sign in succeeds
+                        // the auth state listener will be notified and logic to handle the
+                        // signed in user can be handled in the listener.
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "signInWithCredential", task.getException());
+                            Toast.makeText(LoginActivity.this, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                        else
+                        {
+                            startActivity(new Intent(LoginActivity.this,MainActivity.class));
+                        }
+                        // ...
+                    }
+                });
     }
 
     private void printKeyHash(){
@@ -375,10 +440,22 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                                 Log.w(TAG, "signInWithEmail", task.getException());
                                 Toast.makeText(LoginActivity.this, "Authentication failed.",
                                         Toast.LENGTH_SHORT).show();
-                                showProgress(false);
+                                try {
+                                    throw task.getException();
+                                } catch(FirebaseAuthInvalidUserException e) {
+                                    showProgress(false);
+                                    Toast.makeText(LoginActivity.this, "Authentication failed. Invalid user",
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                                catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+
+
                             }
                             else
                             {
+                                finish();
                                 startActivity(new Intent(getApplicationContext(),MainActivity.class));
                             }
 
@@ -399,7 +476,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
-        return password.length() > 4;
+        return password.length() > 6;
     }
 
     /**

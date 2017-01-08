@@ -31,7 +31,7 @@
         </activity>
         <activity
             android:name=".RegistrationActivity"
-            android:label="@string/title_activity_registration"
+            android:label="Register an account"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".LoginActivity"
