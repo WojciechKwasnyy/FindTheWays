@@ -88,7 +88,17 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="30dp"
-                 />
+                android:layout_marginRight="5dp"
+                android:layout_marginLeft="5dp"
+                style="com_facebook_loginview_dt_styleefaul" />
+
+            <com.google.android.gms.common.SignInButton
+                android:id="@+id/sign_in_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="30dp" />
 
         </LinearLayout>
     </ScrollView>
