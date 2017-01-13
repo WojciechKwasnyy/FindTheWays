@@ -78,8 +78,8 @@ public class RegistrationActivity extends AppCompatActivity {
     private void attemptRegister() {
 
         // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
-        String password = mPasswordView.getText().toString();
+        final String email = mEmailView.getText().toString();
+        final String password = mPasswordView.getText().toString();
         final String username = mUsername.getText().toString();
 
 
@@ -141,6 +141,7 @@ public class RegistrationActivity extends AppCompatActivity {
                             }
                             else
                             {
+
                                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
                                 UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
@@ -153,6 +154,42 @@ public class RegistrationActivity extends AppCompatActivity {
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
                                                     Log.d(TAG, "User profile updated.");
+                                                    mAuth.signInWithEmailAndPassword(email, password)
+                                                            .addOnCompleteListener(RegistrationActivity.this, new OnCompleteListener<AuthResult>() {
+                                                                @Override
+                                                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                                                    Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
+
+                                                                    // If sign in fails, display a message to the user. If sign in succeeds
+                                                                    // the auth state listener will be notified and logic to handle the
+                                                                    // signed in user can be handled in the listener.
+
+                                                                    if (!task.isSuccessful()) {
+                                                                        Log.w(TAG, "signInWithEmail", task.getException());
+                                                                        Toast.makeText(RegistrationActivity.this, "Authentication failed.",
+                                                                                Toast.LENGTH_SHORT).show();
+                                                                        try {
+                                                                            throw task.getException();
+                                                                        } catch(FirebaseAuthInvalidUserException e) {
+                                                                            showProgress(false);
+                                                                            Toast.makeText(RegistrationActivity.this, "Authentication failed. Invalid user",
+                                                                                    Toast.LENGTH_SHORT).show();
+                                                                        }
+                                                                        catch (Exception e) {
+                                                                            e.printStackTrace();
+                                                                        }
+
+
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        finish();
+                                                                        startActivity(new Intent(getApplicationContext(),MainActivity.class));
+                                                                    }
+
+                                                                    // ...
+                                                                }
+                                                            });
                                                 }
                                             }
                                         });
