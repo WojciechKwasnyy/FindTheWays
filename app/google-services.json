@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "760496980571",
+    "firebase_url": "https://findtheways-a3e49.firebaseio.com",
+    "project_id": "findtheways-a3e49",
+    "storage_bucket": "findtheways-a3e49.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:760496980571:android:3dcfdb778bcbf537",
+        "android_client_info": {
+          "package_name": "com.workspaceapp.findtheway"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "760496980571-2hichn13t73mp0dqujet8o5j3pjv3e82.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.workspaceapp.findtheway",
+            "certificate_hash": "6F5598C294D203F9095BE44D5C633EAED0ACD50A"
+          }
+        },
+        {
+          "client_id": "760496980571-904egfmommk7jeqk3ecslr9jaap45no3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.workspaceapp.findtheway",
+            "certificate_hash": "D6A8AEAF5592CA1B6D13FAE64939A8F71F133C78"
+          }
+        },
+        {
+          "client_id": "760496980571-ch87r9o1s8k6o271qpvfuqe1h53j3qqp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCzC-4MGTWbKnTmGdqR_iR4KdEgfkZaOxU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "760496980571-ch87r9o1s8k6o271qpvfuqe1h53j3qqp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
