@@ -1,28 +1,41 @@
 package com.workspaceapp.findtheway;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
-import android.widget.TextView;
 
-import com.google.firebase.auth.FirebaseAuth;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
 
-    Button logoutbutton;
-    TextView textView;
+    MyReceiver myReceiver;
+    //  Button logoutbutton;
+    String latiti;
+    String longti;
+    private SupportMapFragment map_frag;
+    GoogleMap mmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,27 +43,22 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        myReceiver = new MyReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(LocalizationService.MYACTION);
+        registerReceiver(myReceiver, intentFilter);
 
-        logoutbutton = (Button) findViewById(R.id.button2);
-        logoutbutton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FirebaseAuth.getInstance().signOut();
-                finish();
-            }
-        });
+        map_frag = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        map_frag.getMapAsync(this);
 
-        textView = (TextView) findViewById(R.id.textView3);
-        textView.setText(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        //logoutbutton = (Button) findViewById(R.id.button2);
+        //logoutbutton.setOnClickListener(new View.OnClickListener() {
+        //   @Override
+        //  public void onClick(View v) {
+        //      FirebaseAuth.getInstance().signOut();
+        //      finish();
+        //   }
+        // });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -60,7 +68,9 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
     }
+
 
     @Override
     public void onBackPressed() {
@@ -117,5 +127,46 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mmap = googleMap;
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        mmap.setMyLocationEnabled(true);
+    }
+
+    public class MyReceiver extends BroadcastReceiver {
+        MapView mapView;
+
+
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+
+
+            latiti = intent.getStringExtra("Latitiude");
+            longti = intent.getStringExtra("Longtitude");
+            Log.i("ReceivedLatitude",latiti);
+            LatLng actual_position = new LatLng(Double.parseDouble(latiti), Double.parseDouble(longti));
+            if (mmap!=null) {
+                Marker actual_position_marker = mmap.addMarker(new MarkerOptions().position(actual_position).title("HERE"));
+                mmap.addMarker(new MarkerOptions().position(actual_position).title("HERE"));
+                mmap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                        (actual_position), 16));
+            }
+        }
+
+
     }
 }

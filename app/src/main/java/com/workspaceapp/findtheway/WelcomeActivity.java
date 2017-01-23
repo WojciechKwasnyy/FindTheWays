@@ -3,16 +3,7 @@ package com.workspaceapp.findtheway;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -43,6 +34,7 @@ public class WelcomeActivity extends AppCompatActivity {
         {
             //Log.i(TAG,user.getDisplayName());
             gotomain.start();
+
         }
         else
         {
@@ -86,6 +78,7 @@ public class WelcomeActivity extends AppCompatActivity {
                 public void run() {
                     finish();
                     startActivity(new Intent(WelcomeActivity.this,MainActivity.class));
+                    startService(new Intent(WelcomeActivity.this, LocalizationService.class));
                 }
             });
 

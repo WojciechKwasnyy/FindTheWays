@@ -17,6 +17,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBjdzsJYGe_hEUhVIlrznglFowj4r-opOE" />
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
@@ -31,6 +34,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <receiver
+            android:name=".MainActivity$MyReceiver"
+            android:enabled="true"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="action"/>
+                <category android:name="category" />
+            </intent-filter>
+        </receiver>
         <activity
             android:name=".RegistrationActivity"
             android:label="Register an account"

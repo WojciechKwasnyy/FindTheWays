@@ -29,6 +29,8 @@ import java.util.Locale;
 public class LocalizationService extends Service implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
+    final static String MYACTION = "LOCALIZATION_DATA_SEND";
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -86,12 +88,17 @@ public class LocalizationService extends Service implements
             try {
                 addresses = gcd.getFromLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude(), 1);
                 Log.i("Localization: ", String.valueOf(mLastLocation.getLatitude()) + String.valueOf(mLastLocation.getLongitude()));
+                Intent intent = new Intent(getBaseContext(), MainActivity.class);
+                intent.putExtra("Latitiude",  String.valueOf(mLastLocation.getLatitude()));
+                intent.putExtra("Longtitude",  String.valueOf(mLastLocation.getLongitude()));
             } catch (IOException e) {
                 e.printStackTrace();
             }
             {if(addresses != null)
                 if (addresses.size() > 0)
                     Log.i("Current localization: ", addresses.get(0).getLocality());
+
+
             }
         }
 
@@ -110,6 +117,10 @@ public class LocalizationService extends Service implements
 
     @Override
     public void onLocationChanged(Location location) {
-
+        Intent intent = new Intent();
+        intent.setAction(MYACTION);
+        intent.putExtra("Latitiude",String.valueOf(mLastLocation.getLatitude()));
+        intent.putExtra("Longtitude",String.valueOf(mLastLocation.getLongitude()));
+        sendBroadcast(intent);
     }
 }
