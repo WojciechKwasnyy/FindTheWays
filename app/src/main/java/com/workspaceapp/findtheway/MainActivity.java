@@ -26,6 +26,19 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
@@ -36,6 +49,13 @@ public class MainActivity extends AppCompatActivity
     String longti;
     private SupportMapFragment map_frag;
     GoogleMap mmap;
+    KeyPairGenerator kpg;
+    KeyPair kp;
+    PublicKey publicKey;
+    PrivateKey privateKey;
+    byte [] encryptedBytes,decryptedBytes;
+    Cipher cipher,cipher1;
+    String encrypted,decrypted;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +91,32 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    public byte[] RSAEncrypt (final String plain) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException
+    {
+        kpg = KeyPairGenerator.getInstance("RSA");
+        kpg.initialize(1024);
+        kp = kpg.genKeyPair();
+        publicKey = kp.getPublic();
+        privateKey = kp.getPrivate();
+
+        cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+        encryptedBytes = cipher.doFinal(plain.getBytes());
+        //System.out.println("EEncrypted?????" + org.apache.commons.codec.binary.Hex.encodeHexString(encryptedBytes));
+        return encryptedBytes;
+    }
+
+    public String RSADecrypt (final byte[] encryptedBytes) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException
+    {
+
+        cipher1 = Cipher.getInstance("RSA");
+        cipher1.init(Cipher.DECRYPT_MODE, privateKey);
+        decryptedBytes = cipher1.doFinal(encryptedBytes);
+        decrypted = new String(decryptedBytes);
+        //System.out.println("DDecrypted?????" + decrypted);
+        return decrypted;
+
+    }
 
     @Override
     public void onBackPressed() {
@@ -147,13 +193,14 @@ public class MainActivity extends AppCompatActivity
 
     public class MyReceiver extends BroadcastReceiver {
         MapView mapView;
-
+        byte[] LatiRSA;
+        byte[] LontiRSA;
+        String LatiRSA_string;
+        String LontiRSA_string;
 
 
         @Override
         public void onReceive(Context context, Intent intent) {
-
-
 
             latiti = intent.getStringExtra("Latitiude");
             longti = intent.getStringExtra("Longtitude");
@@ -161,9 +208,34 @@ public class MainActivity extends AppCompatActivity
             LatLng actual_position = new LatLng(Double.parseDouble(latiti), Double.parseDouble(longti));
             if (mmap!=null) {
                 Marker actual_position_marker = mmap.addMarker(new MarkerOptions().position(actual_position).title("HERE"));
-                mmap.addMarker(new MarkerOptions().position(actual_position).title("HERE"));
+                mmap.addMarker(new MarkerOptions().position(actual_position).title("HERE YOU ARE"));
                 mmap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                         (actual_position), 16));
+            }
+            try {
+                LatiRSA = RSAEncrypt(latiti);
+                LontiRSA = RSAEncrypt(longti);
+
+                LatiRSA_string =  new String(LatiRSA, "UTF-8");
+                LontiRSA_string =  new String(LontiRSA, "UTF-8");
+
+                LatiRSA = LatiRSA_string.getBytes();
+                LontiRSA = LontiRSA_string.getBytes();
+
+                LatiRSA_string = RSADecrypt(LatiRSA);
+                LontiRSA_string = RSADecrypt(LontiRSA);
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (NoSuchPaddingException e) {
+                e.printStackTrace();
+            } catch (InvalidKeyException e) {
+                e.printStackTrace();
+            } catch (IllegalBlockSizeException e) {
+                e.printStackTrace();
+            } catch (BadPaddingException e) {
+                e.printStackTrace();
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
             }
         }
 
