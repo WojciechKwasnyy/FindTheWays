@@ -48,11 +48,7 @@ public class WelcomeActivity extends AppCompatActivity {
             gotologin.start();
         }
 
-
-
-
     }
-
 
     Thread gotologin = new Thread(new Runnable() {
         @Override

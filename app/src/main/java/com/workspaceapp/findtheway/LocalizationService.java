@@ -11,7 +11,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -19,24 +18,11 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.sinch.android.rtc.ClientRegistration;
-import com.sinch.android.rtc.PushPair;
-import com.sinch.android.rtc.Sinch;
-import com.sinch.android.rtc.SinchClient;
-import com.sinch.android.rtc.SinchClientListener;
-import com.sinch.android.rtc.SinchError;
-import com.sinch.android.rtc.messaging.Message;
-import com.sinch.android.rtc.messaging.MessageClient;
-import com.sinch.android.rtc.messaging.MessageClientListener;
-import com.sinch.android.rtc.messaging.MessageDeliveryInfo;
-import com.sinch.android.rtc.messaging.MessageFailureInfo;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -96,103 +82,7 @@ public class LocalizationService extends Service implements
             e.printStackTrace();
         }
 
-
-
-
-               try {
-                   Config.getInstance().sinchClient = Sinch.getSinchClientBuilder().context(getApplicationContext())
-                           .applicationKey("df1df263-32c7-404a-996e-7b704067d642")
-                           .applicationSecret("bESb6QfQmkqR6t5hGp26Ww==")
-                           .environmentHost("sandbox.sinch.com")
-                           .userId(Config.getInstance().userID)
-                           .build();
-
-                   Config.getInstance().sinchClient.setSupportMessaging(true);
-                   Config.getInstance().sinchClient.setSupportActiveConnectionInBackground(true);
-
-
-
-
-                  // Config.getInstance().sinchClient.setSupportCalling(true);
-
-                   Config.getInstance().sinchClient.addSinchClientListener(new SinchClientListener() {
-                       @Override
-                       public void onClientStarted(SinchClient sinchClient) {
-
-                       }
-
-                       @Override
-                       public void onClientStopped(SinchClient sinchClient) {
-
-                       }
-
-                       @Override
-                       public void onClientFailed(SinchClient sinchClient, SinchError sinchError) {
-
-                       }
-
-                       @Override
-                       public void onRegistrationCredentialsRequired(SinchClient sinchClient, ClientRegistration clientRegistration) {
-
-                       }
-
-                       @Override
-                       public void onLogMessage(int i, String s, String s1) {
-
-                       }
-                   });
-                   Config.getInstance().messageClient = Config.getInstance().sinchClient.getMessageClient();
-                   Config.getInstance().messageClient.addMessageClientListener(new MessageClientListener() {
-                       @Override
-                       public void onIncomingMessage(MessageClient messageClient, Message message) {
-                           Log.i("Sinch",message.getTextBody());
-                           Toast.makeText(getApplicationContext(),"Message from:"+message.getSenderId()+" :"+message.getTextBody(),Toast.LENGTH_LONG).show();
-                       }
-
-                       @Override
-                       public void onMessageSent(MessageClient messageClient, Message message, String s) {
-                            Log.i("Sinch","Message sent to"+message.getRecipientIds().get(0));
-                       }
-
-                       @Override
-                       public void onMessageFailed(MessageClient messageClient, Message message, MessageFailureInfo messageFailureInfo) {
-                            Log.i("Sinch","Messagesendfailde");
-                       }
-
-                       @Override
-                       public void onMessageDelivered(MessageClient messageClient, MessageDeliveryInfo messageDeliveryInfo) {
-                            Log.i("Sinch","Message delivered");
-                       }
-
-                       @Override
-                       public void onShouldSendPushData(MessageClient messageClient, Message message, List<PushPair> list) {
-
-                       }
-                   });
-                   if(!Config.getInstance().sinchClient.isStarted())
-                   {
-                       Config.getInstance().sinchClient.start();
-
-                   }
-
-
-               }catch(Exception e)
-               {
-                   e.printStackTrace();
-               }
-
-
         listenformessages();
-
-
-
-
-
-
-
-
-
-
 
 
     }
