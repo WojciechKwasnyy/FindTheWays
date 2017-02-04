@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -28,8 +29,10 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -61,7 +64,11 @@ public class MainActivity extends AppCompatActivity
     private SupportMapFragment map_frag;
     GoogleMap mmap;
     AlertDialog.Builder builderSingle;
-    String json;
+    String jsonpoints;
+    String jsonlength;
+    LatLng meet_point;
+    MarkerOptions meetpoint_marker;
+    String parsedDistance;
 
 
     @Override
@@ -154,11 +161,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_gallery) {
             startActivity(new Intent(getApplicationContext(),ChatActivity.class));
 
-        } else if (id == R.id.nav_slideshow) {
-
-
-
-        } else if (id == R.id.nav_logout) {
+        }  else if (id == R.id.nav_logout) {
             try {
                 //Config.getInstance().sinchClient.terminate();
                 FirebaseAuth.getInstance().signOut();
@@ -239,10 +242,12 @@ public class MainActivity extends AppCompatActivity
                 LatLng actual_position = new LatLng(Double.parseDouble(latiti), Double.parseDouble(longti));
                 if (mmap!=null) {
                    // Marker actual_position_marker = mmap.addMarker(new MarkerOptions().position(actual_position).title("HERE"));
-                    mmap.addMarker(new MarkerOptions().position(actual_position).title("YOU ARE HERE"));
+                    mmap.addMarker(new MarkerOptions().position(actual_position));
                     mmap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                             (actual_position), 12));
+                    setPois();
                 }
+
             }
             else if(intent.getAction().equals(LocalizationService.MYACTIONREQUEST))
              {
@@ -258,11 +263,13 @@ public class MainActivity extends AppCompatActivity
                             Double sourcelon = Double.parseDouble(longti);
                             Double destlat = Double.parseDouble(friend_langti);
                             Double destlon = Double.parseDouble(friend_longti);
-                            json = jParser.getJSONFromUrl(makeURL(sourcelat, sourcelon, destlat, destlon));
+                            jsonpoints = jParser.getJSONFromUrl(makeURL(sourcelat, sourcelon, destlat, destlon));
+                           // jsonlength = jParser.getJSONFromUrl(makeURLdistance(sourcelat,sourcelon,destlat,destlon));
+
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    drawPath(json);
+                                    drawPath(jsonpoints);
                                 }
                             });
                         }
@@ -313,13 +320,55 @@ public class MainActivity extends AppCompatActivity
                 JSONObject routes = routeArray.getJSONObject(0);
                 JSONObject overviewPolylines = routes.getJSONObject("overview_polyline");
                 String encodedString = overviewPolylines.getString("points");
+
+                //String destination = destinationaddress.getString("")
                 List<LatLng> list = decodePoly(encodedString);
+                meet_point = list.get(list.size()/2);
+
+
+
+
+
                 Polyline line = mmap.addPolyline(new PolylineOptions()
                         .addAll(list)
                         .width(12)
-                        .color(Color.parseColor("#05b1fb"))//Google maps blue color
+                        .color(Color.parseColor("#006400"))//Google maps blue color
                         .geodesic(true)
                 );
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try{
+                            JSONParser jParser = new JSONParser();
+                            Double sourcelat = meet_point.latitude;
+                            Double sourcelon = meet_point.longitude;
+                            Double destlat = Double.parseDouble(friend_langti);
+                            Double destlon = Double.parseDouble(friend_longti);
+                            jsonlength = jParser.getJSONFromUrl(makeURL(sourcelat,sourcelon,destlat, destlon));
+                            final JSONObject json = new JSONObject(jsonlength);
+                            JSONArray array = json.getJSONArray("routes");
+                            JSONObject routes = array.getJSONObject(0);
+                            JSONArray legs = routes.getJSONArray("legs");
+                            JSONObject steps = legs.getJSONObject(0);
+                            JSONObject distance = steps.getJSONObject("distance");
+                            parsedDistance=distance.getString("text");
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    meetpoint_marker = new MarkerOptions().position(meet_point).title("MEET POINT").snippet(parsedDistance).icon(BitmapDescriptorFactory.fromResource(R.drawable.placeholder));
+                                    mmap.addMarker(meetpoint_marker);
+                                }
+                            });
+
+
+                        }catch(Exception e)
+                        {
+                            e.printStackTrace();
+                        }
+                    }
+                }).start();
 /*
            for(int z = 0; z<list.size()-1;z++){
                 LatLng src= list.get(z);
@@ -385,5 +434,56 @@ public class MainActivity extends AppCompatActivity
         urlString.append("&sensor=false&mode=walking&alternatives=true");
         urlString.append("&key=AIzaSyAvts-3gnuzIMKQK0YQH_0aFLSd0A3uimc"); //
         return urlString.toString();
+    }
+
+    public String makeURLdistance(double sourcelat, double sourcelog, double destlat, double destlog)
+    {
+        StringBuilder urlString = new StringBuilder();
+        urlString.append("https://maps.googleapis.com/maps/api/distancematrix/json");
+        urlString.append("?units=imperial&origins=");
+        urlString.append(Double.toString(sourcelat));
+        urlString.append(",");
+        urlString.append(Double.toString(sourcelog));
+        urlString.append("&destinations=");
+        urlString.append(Double.toString(destlat));
+        urlString.append(",");
+        urlString.append(Double.toString(destlog));
+        urlString.append("&sensor=false&mode=walking&alternatives=true");
+        urlString.append("&key=AIzaSyAvts-3gnuzIMKQK0YQH_0aFLSd0A3uimc"); //
+        return urlString.toString();
+
+    }
+    public void setPois()
+    {
+        BitmapDescriptor icon_volleyball = BitmapDescriptorFactory.fromResource(R.drawable.volleyball24);
+        BitmapDescriptor icon_gym = BitmapDescriptorFactory.fromResource(R.drawable.weightlifting);
+        BitmapDescriptor icon_put = BitmapDescriptorFactory.fromResource(R.drawable.mortarboard);
+        BitmapDescriptor icon_hotel = BitmapDescriptorFactory.fromResource(R.drawable.hotel);
+        BitmapDescriptor icon_arena = BitmapDescriptorFactory.fromResource(R.drawable.trophy);
+        BitmapDescriptor icon_air = BitmapDescriptorFactory.fromResource(R.drawable.humidity);
+        BitmapDescriptor icon_market = BitmapDescriptorFactory.fromResource(R.drawable.cart);
+        BitmapDescriptor icon_fuel = BitmapDescriptorFactory.fromResource(R.drawable.fuel);
+
+        LatLng volleyball_place = new LatLng(52.393417, 16.950931);
+        LatLng volleyball_place2 = new LatLng(52.4290443, 16.8759770);
+        LatLng gym_place = new LatLng(52.395478, 16.942527);
+        LatLng put_poznan = new LatLng(52.402838, 16.951529);
+        LatLng uam_campus = new LatLng(52.467238, 16.923818);
+        LatLng hotel = new LatLng(52.401028, 16.926190);
+        LatLng arena = new LatLng(52.397498, 16.891832);
+        LatLng air_condition = new LatLng(52.420193, 16.877376);
+        LatLng market = new LatLng(52.393334, 16.920083);
+        LatLng fuel_station = new LatLng(52.426949, 16.917654);
+
+        mmap.addMarker(new MarkerOptions().position(volleyball_place).title("Beach volleyball field").icon(icon_volleyball));
+        mmap.addMarker(new MarkerOptions().position(volleyball_place2).title("Beach volleyball field").icon(icon_volleyball));
+        mmap.addMarker(new MarkerOptions().position(gym_place).title("Gym").icon(icon_gym));
+        mmap.addMarker(new MarkerOptions().position(put_poznan).title("Poznan Universitet of Technology").icon(icon_put));
+        mmap.addMarker(new MarkerOptions().position(uam_campus).title("Campus UAM").icon(icon_put));
+        mmap.addMarker(new MarkerOptions().position(hotel).title("Andersia hotel & restaurant").icon(icon_hotel));
+        mmap.addMarker(new MarkerOptions().position(arena).title("Hala widowiskowa Arena").icon(icon_arena));
+        mmap.addMarker(new MarkerOptions().position(air_condition).title("The air quality monitoring system").icon(icon_air));
+        mmap.addMarker(new MarkerOptions().position(market).title("market square").icon(icon_market));
+        mmap.addMarker(new MarkerOptions().position(fuel_station).title("Gas station").icon(icon_fuel));
     }
 }
