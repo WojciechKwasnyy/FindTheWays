@@ -21,7 +21,7 @@
             android:value="@string/facebook_app_id" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBjdzsJYGe_hEUhVIlrznglFowj4r-opOE" />
+            android:value="AIzaSyAvts-3gnuzIMKQK0YQH_0aFLSd0A3uimc" />
 
         <activity
             android:name=".MainActivity"
@@ -70,10 +70,12 @@
             android:name=".LocalizationService"
             android:stopWithTask="true" />
 
-        <activity
-            android:name=".FindFriendActivity"
-            android:label="Chose friend to find"></activity>
-        <activity android:name=".ChatActivity"></activity>
+        <activity android:name=".FindFriendActivity"
+            android:label="Chose friend to find">
+        </activity>
+        <activity android:name=".ChatActivity">
+        </activity>
+
     </application>
 
 </manifest>

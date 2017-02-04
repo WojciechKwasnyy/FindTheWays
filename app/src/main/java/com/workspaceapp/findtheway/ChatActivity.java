@@ -1,11 +1,10 @@
 package com.workspaceapp.findtheway;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.google.firebase.database.DataSnapshot;
@@ -91,7 +90,6 @@ public class ChatActivity extends AppCompatActivity {
                 }
                 if(!message.getBody().equals("FIND_REQUEST")) {
                     messages.add(message);
-                    chatAdapter.notify();
                 }
             }
 

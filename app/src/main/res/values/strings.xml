@@ -3,6 +3,7 @@
     <string name="facebook_app_id">fb244708052632679</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
 
     <string name="action_settings">Settings</string>
     <string name="title_activity_welcome">WelcomeActivity</string>
