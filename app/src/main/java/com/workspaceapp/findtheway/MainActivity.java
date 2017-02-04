@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -16,13 +15,19 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.facebook.FacebookSdk;
+import com.facebook.login.LoginManager;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -30,22 +35,40 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.sinch.android.rtc.PushPair;
+import com.sinch.android.rtc.messaging.Message;
+import com.sinch.android.rtc.messaging.MessageClient;
+import com.sinch.android.rtc.messaging.MessageClientListener;
+import com.sinch.android.rtc.messaging.MessageDeliveryInfo;
+import com.sinch.android.rtc.messaging.MessageFailureInfo;
+import com.sinch.android.rtc.messaging.WritableMessage;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
+import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 import java.util.List;
+
+import javax.crypto.Cipher;
+
+import Decoder.BASE64Decoder;
+import Decoder.BASE64Encoder;
 
 
 public class MainActivity extends AppCompatActivity
@@ -60,7 +83,6 @@ public class MainActivity extends AppCompatActivity
     private SupportMapFragment map_frag;
     GoogleMap mmap;
     AlertDialog.Builder builderSingle;
-    String json;
 
 
     @Override
@@ -72,6 +94,7 @@ public class MainActivity extends AppCompatActivity
         myReceiver = new MyReceiver();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(LocalizationService.MYACTION);
+        intentFilter.addAction(LocalizationService.MYACTIONREQUEST);
         registerReceiver(myReceiver, intentFilter);
 
 
@@ -129,9 +152,42 @@ public class MainActivity extends AppCompatActivity
 
         navigationView.setNavigationItemSelectedListener(this);
 
+        MessageClient messageClient = Config.getInstance().sinchClient.getMessageClient();
+        messageClient.addMessageClientListener(new MessageClientListener() {
+            @Override
+            public void onIncomingMessage(MessageClient messageClient, Message message) {
+                Log.i("what:", message.getTextBody());
+            }
+
+            @Override
+            public void onMessageSent(MessageClient messageClient, Message message, String s) {
+
+            }
+
+            @Override
+            public void onMessageFailed(MessageClient messageClient, Message message, MessageFailureInfo messageFailureInfo) {
+
+            }
+
+            @Override
+            public void onMessageDelivered(MessageClient messageClient, MessageDeliveryInfo messageDeliveryInfo) {
+
+            }
+
+            @Override
+            public void onShouldSendPushData(MessageClient messageClient, Message message, List<PushPair> list) {
+
+            }
+        });
+
+
+
+
+
 
 
     }
+
 
     @Override
     public void onBackPressed() {
@@ -153,6 +209,7 @@ public class MainActivity extends AppCompatActivity
             startActivity(new Intent(getApplicationContext(),FindFriendActivity.class));
 
         } else if (id == R.id.nav_gallery) {
+            startActivity(new Intent(getApplicationContext(),ChatActivity.class));
 
         } else if (id == R.id.nav_slideshow) {
 
@@ -215,21 +272,20 @@ public class MainActivity extends AppCompatActivity
                 public void onCancelled(DatabaseError databaseError) {
 
                 }
-
             });
 
 
        // mmap.setMyLocationEnabled(true);
-
-
     }
 
     public class MyReceiver extends BroadcastReceiver {
         MapView mapView;
-        String url ="";
+
+
 
         @Override
         public void onReceive(Context context, Intent intent) {
+
 
             //if(intent.getAction().equals(LocalizationService.MYACTIONREQUEST))
             //{
@@ -248,41 +304,18 @@ public class MainActivity extends AppCompatActivity
                     mmap.addMarker(new MarkerOptions().position(actual_position).title("YOU ARE HERE"));
                     mmap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                             (actual_position), 12));
+
                 }
             }
             else if(intent.getAction().equals(LocalizationService.MYACTIONREQUEST))
              {
+                 Log.i("LOG",intent.getStringExtra("Request"));
                  dialogBox(intent.getStringExtra("Request"));
              }
 
-            //JSONParser jParser = new JSONParser();
-            if(!friend_langti.equals("")) {
-                try {
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            JSONParser jParser = new JSONParser();
-                            Double sourcelat = Double.parseDouble(latiti);
-                            Double sourcelon = Double.parseDouble(longti);
-                            Double destlat = Double.parseDouble(friend_langti);
-                            Double destlon = Double.parseDouble(friend_longti);
-                            json = jParser.getJSONFromUrl(makeURL(sourcelat, sourcelon, destlat, destlon));
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    drawPath(json);
-                                }
-                            });
-                        }
-                    }).start();
-
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }
         }
 
-        public void dialogBox(String user) {
+        public void dialogBox(final String user) {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
             alertDialogBuilder.setMessage(user+ " wants to find you");
             alertDialogBuilder.setPositiveButton("Ok",
@@ -290,8 +323,12 @@ public class MainActivity extends AppCompatActivity
 
                         @Override
                         public void onClick(DialogInterface arg0, int arg1) {
-                            
-
+                            FirebaseDatabase.getInstance().getReference().child(user).child("Messages").child("body").setValue("FIND_RESPONSE_OK");
+                            FirebaseDatabase.getInstance().getReference().child(user).child("Messages").child("received").setValue(true);
+                            FirebaseDatabase.getInstance().getReference().child(user).child("Messages").child("sender").setValue(Config.getInstance().userID);
+                            FirebaseDatabase.getInstance().getReference().child(user).child("Messages").child("timestamp").setValue(ServerValue.TIMESTAMP);
+                            Config.getInstance().isfriendlocationenabled = true;
+                            Config.getInstance().connectedwith = user;
                         }
                     });
 
@@ -308,86 +345,7 @@ public class MainActivity extends AppCompatActivity
             alertDialog.show();
         }
 
-        public void drawPath(String  result) {
-            Polyline line2;
-            try {
-                //Tranform the string into a json object
-                final JSONObject json = new JSONObject(result);
-                JSONArray routeArray = json.getJSONArray("routes");
-                JSONObject routes = routeArray.getJSONObject(0);
-                JSONObject overviewPolylines = routes.getJSONObject("overview_polyline");
-                String encodedString = overviewPolylines.getString("points");
-                List<LatLng> list = decodePoly(encodedString);
-                Polyline line = mmap.addPolyline(new PolylineOptions()
-                        .addAll(list)
-                        .width(12)
-                        .color(Color.parseColor("#05b1fb"))//Google maps blue color
-                        .geodesic(true)
-                );
-/*
-           for(int z = 0; z<list.size()-1;z++){
-                LatLng src= list.get(z);
-                LatLng dest= list.get(z+1);
-                 line2 = mmap.addPolyline(new PolylineOptions()
-                .add(new LatLng(src.latitude, src.longitude), new LatLng(dest.latitude,   dest.longitude))
-                .width(2)
-                .color(Color.BLUE).geodesic(true));
-            }
-*/
-            }
-            catch (JSONException e) {
 
-            }
-
-        }
-        private List<LatLng> decodePoly(String encoded) {
-
-            List<LatLng> poly = new ArrayList<LatLng>();
-            int index = 0, len = encoded.length();
-            int lat = 0, lng = 0;
-
-            while (index < len) {
-                int b, shift = 0, result = 0;
-                do {
-                    b = encoded.charAt(index++) - 63;
-                    result |= (b & 0x1f) << shift;
-                    shift += 5;
-                } while (b >= 0x20);
-                int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-                lat += dlat;
-
-                shift = 0;
-                result = 0;
-                do {
-                    b = encoded.charAt(index++) - 63;
-                    result |= (b & 0x1f) << shift;
-                    shift += 5;
-                } while (b >= 0x20);
-                int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-                lng += dlng;
-
-                LatLng p = new LatLng( (((double) lat / 1E5)),
-                        (((double) lng / 1E5) ));
-                poly.add(p);
-            }
-            return poly;
-        }
     }
-    public String makeURL (double sourcelat, double sourcelog, double destlat, double destlog ){
-        StringBuilder urlString = new StringBuilder();
-        urlString.append("https://maps.googleapis.com/maps/api/directions/json");
-        urlString.append("?origin=");
-        urlString.append(Double.toString(sourcelat));
-        urlString.append(",");
-        urlString
-                .append(Double.toString( sourcelog));
-        urlString.append("&destination=");
-        urlString
-                .append(Double.toString( destlat));
-        urlString.append(",");
-        urlString.append(Double.toString( destlog));
-        urlString.append("&sensor=false&mode=walking&alternatives=true");
-        urlString.append("&key=AIzaSyAvts-3gnuzIMKQK0YQH_0aFLSd0A3uimc"); //
-        return urlString.toString();
-    }
+
 }

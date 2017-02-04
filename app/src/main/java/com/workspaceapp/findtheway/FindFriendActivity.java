@@ -1,9 +1,10 @@
 package com.workspaceapp.findtheway;
 
 import android.content.DialogInterface;
-import android.os.Bundle;
+import android.support.v4.widget.ListViewAutoScrollHelper;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -13,6 +14,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.sinch.android.rtc.messaging.WritableMessage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,7 +84,9 @@ public class FindFriendActivity extends AppCompatActivity {
                     public void onClick(DialogInterface arg0, int arg1) {
 
                         try{
-
+                            WritableMessage message = new WritableMessage(
+                                    user.getUserID(),
+                                    "FIND_REQUEST");
                             FirebaseDatabase.getInstance().getReference().child(user.getUserID()).child("Messages").child("body").setValue("FIND_REQUEST");
                             FirebaseDatabase.getInstance().getReference().child(user.getUserID()).child("Messages").child("received").setValue(true);
                             FirebaseDatabase.getInstance().getReference().child(user.getUserID()).child("Messages").child("sender").setValue(Config.getInstance().userID);

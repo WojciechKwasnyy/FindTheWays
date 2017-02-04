@@ -2,7 +2,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:ads="http://schemas.android.com/apk/res-auto"
     android:gravity="center_horizontal"
     android:orientation="vertical"
     android:paddingLeft="@dimen/activity_horizontal_margin"
@@ -30,8 +29,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="16dp"
-            android:orientation="vertical"
-            android:weightSum="1">
+            android:orientation="vertical">
 
 
 
@@ -111,14 +109,6 @@
 
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="15dp" />
-
-            <com.google.android.gms.ads.AdView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/adView2"
-                android:layout_weight="0.44"
-                ads:adSize="BANNER"
-                ads:adUnitId="@string/banner_ad_unit_id"/>
 
         </LinearLayout>
     </ScrollView>
