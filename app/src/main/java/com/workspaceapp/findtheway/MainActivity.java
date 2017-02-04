@@ -228,10 +228,6 @@ public class MainActivity extends AppCompatActivity
         MapView mapView;
         String url ="";
 
-        //url = makeURL(sourcelat, sourcelon, destlat, destlon);
-
-
-
         @Override
         public void onReceive(Context context, Intent intent) {
 
