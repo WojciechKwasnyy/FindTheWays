@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserInfo;
 
 import static java.lang.Thread.sleep;
 
@@ -33,6 +34,12 @@ public class WelcomeActivity extends AppCompatActivity {
         if(user!= null)
         {
             //Log.i(TAG,user.getDisplayName());
+            Config.getInstance().email = user.getEmail();
+            Config.getInstance().username = user.getDisplayName();
+            Config.getInstance().userID = user.getUid();
+            for (UserInfo iuser: FirebaseAuth.getInstance().getCurrentUser().getProviderData()) {
+                Config.getInstance().provider = iuser.getProviderId();
+            }
             gotomain.start();
 
         }

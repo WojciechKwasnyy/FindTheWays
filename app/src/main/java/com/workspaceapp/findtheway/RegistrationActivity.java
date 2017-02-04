@@ -26,6 +26,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class RegistrationActivity extends AppCompatActivity {
 
@@ -183,8 +184,10 @@ public class RegistrationActivity extends AppCompatActivity {
                                                                     }
                                                                     else
                                                                     {
+
                                                                         finish();
-                                                                        startActivity(new Intent(getApplicationContext(),MainActivity.class));
+                                                                       // startService(new Intent(getApplicationContext(),LocalizationService.class));
+                                                                        startActivity(new Intent(getApplicationContext(),LoginActivity.class));
                                                                     }
 
                                                                     // ...

@@ -37,6 +37,7 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.LoggingBehavior;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.Auth;
@@ -55,12 +56,15 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.FirebaseDatabase;
 
+import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.Manifest.permission.READ_CONTACTS;
 
 /**
@@ -102,6 +106,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     String TAG = "FindTheWays";
     int RC_SIGN_IN = 1;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         FacebookSdk.sdkInitialize(getApplicationContext());
@@ -109,13 +114,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         FacebookSdk.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        mayRequestContacts();
      //   printKeyHash();
 
-        startService(new Intent(this, LocalizationService.class));
+
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-        populateAutoComplete();
+
 
         mPasswordView = (EditText) findViewById(R.id.password);
 
@@ -144,7 +150,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
 // ...
 // Initialize Firebase Auth
-        FirebaseAuth.getInstance().signOut();
         mAuth = FirebaseAuth.getInstance();
 
 
@@ -207,6 +212,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
+
+
 
     protected void setButtonText(SignInButton signInButton, String buttonText) {
         for (int i = 0; i < signInButton.getChildCount(); i++) {
@@ -275,6 +282,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         }
                         else
                         {
+                            Config.getInstance().provider = "google.com";
+                            Config.getInstance().username = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
+                            Config.getInstance().email = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+                            Config.getInstance().userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                            FirebaseDatabase.getInstance().getReference().child(Config.getInstance().userID).child("email").setValue(Config.getInstance().email);
+                            finish();
+                            startService(new Intent(getApplicationContext(),LocalizationService.class));
                             startActivity(new Intent(LoginActivity.this,MainActivity.class));
                         }
                         // ...
@@ -319,6 +333,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         }
                         else
                         {
+
+                            Config.getInstance().provider = "facebook.com";
+                            Config.getInstance().username = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
+                            Config.getInstance().email = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+                            Config.getInstance().userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                            FirebaseDatabase.getInstance().getReference().child(Config.getInstance().userID).child("email").setValue(Config.getInstance().email);
+                            finish();
+                            startService(new Intent(getApplicationContext(),LocalizationService.class));
                             startActivity(new Intent(getApplicationContext(),MainActivity.class));
                         }
 
@@ -330,32 +352,26 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
 
 
-    private void populateAutoComplete() {
-        if (!mayRequestContacts()) {
-            return;
-        }
 
-        getLoaderManager().initLoader(0, null, this);
-    }
 
     private boolean mayRequestContacts() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             return true;
         }
-        if (checkSelfPermission(READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
+        if (checkSelfPermission(ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             return true;
         }
-        if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
+        if (shouldShowRequestPermissionRationale(ACCESS_FINE_LOCATION)) {
             Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
                     .setAction(android.R.string.ok, new View.OnClickListener() {
                         @Override
                         @TargetApi(Build.VERSION_CODES.M)
                         public void onClick(View v) {
-                            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
+                            requestPermissions(new String[]{ACCESS_FINE_LOCATION}, REQUEST_READ_CONTACTS);
                         }
                     });
         } else {
-            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
+            requestPermissions(new String[]{ACCESS_FINE_LOCATION}, REQUEST_READ_CONTACTS);
         }
         return false;
     }
@@ -368,7 +384,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                                            @NonNull int[] grantResults) {
         if (requestCode == REQUEST_READ_CONTACTS) {
             if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                populateAutoComplete();
+
             }
         }
     }
@@ -450,7 +466,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                             }
                             else
                             {
+
+                                Config.getInstance().provider = "password";
+                                Config.getInstance().username = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
+                                Config.getInstance().email = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+                                Config.getInstance().userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                                FirebaseDatabase.getInstance().getReference().child(Config.getInstance().userID).child("email").setValue(Config.getInstance().email);
                                 finish();
+                                startService(new Intent(getApplicationContext(),LocalizationService.class));
                                 startActivity(new Intent(getApplicationContext(),MainActivity.class));
                             }
 
