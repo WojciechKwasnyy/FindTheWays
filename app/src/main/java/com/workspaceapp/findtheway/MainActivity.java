@@ -122,6 +122,8 @@ public class MainActivity extends AppCompatActivity
 
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        Menu menu = navigationView.getMenu();
+        //Menu item_find = menu.getItem(R.id.)
         View hView =  navigationView.getHeaderView(0);
         TextView nav_user = (TextView)hView.findViewById(R.id.draweremail);
         TextView nav_username = (TextView)hView.findViewById(R.id.username);
@@ -195,7 +197,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -243,7 +244,7 @@ public class MainActivity extends AppCompatActivity
             return;
         }
 
-            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("OqoD3d2anhbiep6u6SqmxE2aVbF2").child("localization");
+            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child(Config.getInstance().connectedwith).child("localization");
             databaseReference.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -258,8 +259,10 @@ public class MainActivity extends AppCompatActivity
                             friend_longti = child.getValue().toString();
                         }
                     }
-                    LatLng friend_actual_position = new LatLng(Double.parseDouble(friend_langti), Double.parseDouble(friend_longti));
-                    mmap.addMarker(new MarkerOptions().position(friend_actual_position).title("YOUR FRIEND IS HERE").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA)));
+                    if(Config.getInstance().isfriendlocationenabled) {
+                        LatLng friend_actual_position = new LatLng(Double.parseDouble(friend_langti), Double.parseDouble(friend_longti));
+                        mmap.addMarker(new MarkerOptions().position(friend_actual_position).title("YOUR FRIEND IS HERE").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA)));
+                    }
                 }
 
                 @Override
@@ -294,8 +297,8 @@ public class MainActivity extends AppCompatActivity
                 Log.i("ReceivedLatitude",latiti);
                 LatLng actual_position = new LatLng(Double.parseDouble(latiti), Double.parseDouble(longti));
                 if (mmap!=null) {
-                    Marker actual_position_marker = mmap.addMarker(new MarkerOptions().position(actual_position).title("HERE"));
-                    mmap.addMarker(new MarkerOptions().position(actual_position).title("HERE"));
+                   // Marker actual_position_marker = mmap.addMarker(new MarkerOptions().position(actual_position).title("HERE"));
+                    mmap.addMarker(new MarkerOptions().position(actual_position).title("YOU ARE HERE"));
                     mmap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                             (actual_position), 12));
 
