@@ -80,6 +80,7 @@ public class MainActivity extends AppCompatActivity
         myReceiver = new MyReceiver();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(LocalizationService.MYACTION);
+        intentFilter.addAction(LocalizationService.MYACTIONREQUEST);
         registerReceiver(myReceiver, intentFilter);
 
 
@@ -281,20 +282,22 @@ public class MainActivity extends AppCompatActivity
             }
         }
 
-        public void dialogBox(final String user) {
+        public void dialogBox(String user) {
+            user = Config.getInstance().getDisplayname(user);
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
             alertDialogBuilder.setMessage(user+ " wants to find you");
+            final String finalUser = user;
             alertDialogBuilder.setPositiveButton("Ok",
                     new DialogInterface.OnClickListener() {
 
                         @Override
                         public void onClick(DialogInterface arg0, int arg1) {
-                            FirebaseDatabase.getInstance().getReference().child(user).child("Messages").child("body").setValue("FIND_RESPONSE_OK");
-                            FirebaseDatabase.getInstance().getReference().child(user).child("Messages").child("received").setValue(true);
-                            FirebaseDatabase.getInstance().getReference().child(user).child("Messages").child("sender").setValue(Config.getInstance().userID);
-                            FirebaseDatabase.getInstance().getReference().child(user).child("Messages").child("timestamp").setValue(ServerValue.TIMESTAMP);
+                            FirebaseDatabase.getInstance().getReference().child(finalUser).child("Messages").child("body").setValue("FIND_RESPONSE_OK");
+                            FirebaseDatabase.getInstance().getReference().child(finalUser).child("Messages").child("received").setValue(true);
+                            FirebaseDatabase.getInstance().getReference().child(finalUser).child("Messages").child("sender").setValue(Config.getInstance().userID);
+                            FirebaseDatabase.getInstance().getReference().child(finalUser).child("Messages").child("timestamp").setValue(ServerValue.TIMESTAMP);
                             Config.getInstance().isfriendlocationenabled = true;
-                            Config.getInstance().connectedwith = user;
+                            Config.getInstance().connectedwith = finalUser;
                         }
                     });
 

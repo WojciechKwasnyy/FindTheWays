@@ -37,7 +37,7 @@ public class ChatActivity extends AppCompatActivity {
         messages  = new ArrayList<>();
         chatAdapter = new ChatAdapter(messages,this);
         chatListView.setAdapter(chatAdapter);
-        chatAdapter.notifyDataSetChanged();
+
 
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -56,7 +56,8 @@ public class ChatActivity extends AppCompatActivity {
                 }
 
                     messages.add(new Message(Config.getInstance().userID, true, ServerValue.TIMESTAMP.toString(), textToSendField.getText().toString()));
-                    textToSendField.setText("");
+                chatAdapter.notifyDataSetChanged();
+                textToSendField.setText("");
             }
         });
 
@@ -87,6 +88,7 @@ public class ChatActivity extends AppCompatActivity {
                 if(!message.getBody().equals("FIND_REQUEST")) {
                     if(messagescounter>0) {
                         messages.add(message);
+                        chatAdapter.notifyDataSetChanged();
                     }
                 }
                 messagescounter++;
