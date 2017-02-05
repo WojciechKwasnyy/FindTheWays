@@ -17,7 +17,7 @@ public class Config {
     String provider;
     String userID;
     boolean isfriendlocationenabled = true;
-    String connectedwith = "OqoD3d2anhbiep6u6SqmxE2aVbF2";
+    String connectedwith = "8qyYKDsrjycHEPFIPBrIkPV3YUh1";
     String customdisplayname;
     private static Config instance = null;
     protected Config() {
