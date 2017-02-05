@@ -327,45 +327,5 @@ public class LocalizationService extends Service implements
         return priv;
     }
 
-    private String getusername(final String userID)
-    {
-        final List<User> users = new ArrayList<>();
-        String displayname = "0";
-        FirebaseDatabase.getInstance().getReference().addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot child : dataSnapshot.getChildren()) {
-                    //new User(dataSnapshot.getKey(),dataSnapshot.child("displayname").getValue().toString(),dataSnapshot.child("email").getValue().toString());
-                    String displayname = child.child("displayname").getValue().toString();
-                    String email;
-                    if(child.child("email").getValue() == null)
-                    {
-                        email = "no address";
-                    }
-                    else
-                    {
-                        email = child.child("email").getValue().toString();
-                    }
 
-                    String provider = child.child("provider").getValue().toString();
-                    String uID = child.getKey();
-                   users.add(new User(uID,email,provider,displayname));
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-        for(int i =0;i <users.size();i++)
-        {
-            if(users.get(i).getUserID().equals(userID))
-            {
-                displayname = users.get(i).getDisplayname();
-            }
-        }
-        return displayname;
-    }
 }

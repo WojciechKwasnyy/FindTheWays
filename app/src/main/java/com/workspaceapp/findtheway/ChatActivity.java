@@ -23,23 +23,18 @@ public class ChatActivity extends AppCompatActivity {
     ListView chatListView;
     ImageButton sendButton;
     EditText textToSendField;
+    int messagescounter =0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        getSupportActionBar().setTitle(Config.getInstance().connectedwith);
+        getSupportActionBar().setTitle("Chat with " + Config.getInstance().getDisplayname(Config.getInstance().connectedwith));
 
         chatListView = (ListView) findViewById(R.id.chat_listview);
         sendButton = (ImageButton) findViewById(R.id.send_button);
         textToSendField = (EditText) findViewById(R.id.chat_ET);
         messages  = new ArrayList<>();
-        final Message mes = new Message();
-        mes.setBody("message");
-        mes.setSender("dsfsf");
-        mes.setReceived(true);
-        mes.setTimestamp(ServerValue.TIMESTAMP.toString());
-        messages.add(mes);
         chatAdapter = new ChatAdapter(messages,this);
         chatListView.setAdapter(chatAdapter);
         chatAdapter.notifyDataSetChanged();
@@ -59,8 +54,9 @@ public class ChatActivity extends AppCompatActivity {
                 {
                     e.printStackTrace();
                 }
-                messages.add(new Message(Config.getInstance().userID,true,ServerValue.TIMESTAMP.toString(),textToSendField.getText().toString()));
-                textToSendField.setText("");
+
+                    messages.add(new Message(Config.getInstance().userID, true, ServerValue.TIMESTAMP.toString(), textToSendField.getText().toString()));
+                    textToSendField.setText("");
             }
         });
 
@@ -89,8 +85,11 @@ public class ChatActivity extends AppCompatActivity {
                     }
                 }
                 if(!message.getBody().equals("FIND_REQUEST")) {
-                    messages.add(message);
+                    if(messagescounter>0) {
+                        messages.add(message);
+                    }
                 }
+                messagescounter++;
             }
 
             @Override

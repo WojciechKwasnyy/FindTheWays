@@ -16,16 +16,20 @@
         android:layout_height="wrap_content"
         android:id="@+id/chat_listview"
         android:layout_alignParentTop="true"
-        android:layout_above="@+id/mylinearlayout" />
+        android:layout_above="@+id/mylinearlayout"
+        android:dividerHeight="0dp"
+        android:footerDividersEnabled="true" />
 
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
-        android:paddingBottom="5dp"
+        android:paddingBottom="1dp"
         android:id="@+id/mylinearlayout"
         android:layout_alignParentBottom="true"
+        android:divider="@null"
+        android:dividerHeight="0dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentStart="true">
 
