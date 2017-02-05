@@ -39,8 +39,10 @@ import com.facebook.FacebookSdk;
 import com.facebook.LoggingBehavior;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -102,6 +104,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private GoogleApiClient mGoogleApiClient;
 
+    InterstitialAd mInterstitialAd;
+
 
     String TAG = "FindTheWays";
     int RC_SIGN_IN = 1;
@@ -127,10 +131,36 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
 
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+
+
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(final View view) {
+                requestNewInterstitial();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Firsts(view);
+                            }
+                        });
+                    }
+                }).start();
 
+            }
+        });
+        mInterstitialAd = new InterstitialAd(this);
+        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+        mInterstitialAd.setAdListener(new AdListener() {
+            @Override
+            public void onAdClosed() {
                 attemptLogin();
             }
         });
@@ -651,6 +681,24 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         protected void onCancelled() {
             mAuthTask = null;
             showProgress(false);
+        }
+    }
+    private void requestNewInterstitial()
+    {
+        AdRequest adRequest = new AdRequest.Builder()
+                .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                .build();
+        mInterstitialAd.loadAd(adRequest);
+    }
+    public void Firsts(View view)
+    {
+        if (mInterstitialAd.isLoaded())
+        {
+            mInterstitialAd.show();
+        }
+        else
+        {
+            attemptLogin();
         }
     }
 }
